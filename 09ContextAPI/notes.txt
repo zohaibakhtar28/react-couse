@@ -1,0 +1,139 @@
+Used to optimise problem with props. Passing data in an optimised way
+We use a global file and each component access attributes using this global Objects.
+This is known as Prop Drilling.
+-----------------------------------
+
+Context API is pure StateManagement associated with React.
+-----------------------------------
+
+1.) Src > Context > UserContext.js
+
+Isme ek context banake export krdo.
+import React from "react";
+
+const UserContext = React.createContext()
+
+export default  UserContext;
+..
+
+Iska ek provider banao : UserContext ke andar sab components ko wrap ko krdo so that wo sab is global context se data ka acess le paaye.
+src> UserContextProvider.jsx.
+
+import React from "react";
+import UserContext from "./UserContext";
+
+const UserContextProvider = ({children}) => { //This children is any component passed to it : Card, Login App.
+    return (
+
+        <>
+        {children}
+        </>
+    )
+}
+
+export default UserContextProvider;
+
+. Ab us component ke konse value ka access de so : we use useState
+
+import React, { useState } from "react";
+import UserContext from "./UserContext";
+
+const UserContextProvider = ({children}) => {
+    const [user, setUser] = useState(null);
+    return (
+
+        <UserContext.Provider value = {{}}>  //Provider ke andar children ko wrap kiya. Value mai wo saari props hogi jisko saari states acess kar payengi
+        {children}
+        </UserContext.Provider>
+    )
+}
+
+export default UserContextProvider;
+-------------------------------------
+
+Iska access ab ham app.jsx mai lenge.
+
+import UserContextProvider from './context/UserContextProvider'
+
+function App() {
+  
+
+  return (
+    <UserContextProvider>
+      <h1>Chai with React</h1>
+    </UserContextProvider>
+  )
+}
+
+export default App
+
+Now isme ham jo bhi component lenge usme directly access milega
+-----------------------------------------------------------------
+
+Now making component : Login and Profile
+In Login we use hook UserContext. To fetch values from this userContext.
+
+import React from "react";
+import UserContext from "../context/UserContext";
+import { useState, useContext } from "react";
+function Login() {
+  const [username, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+
+
+  const {setUser} = useContext(UserContext); //Ye setUser hmko mila provider se : const [user, setUser] = useState(null);
+
+  const handleSubmit = () => {};
+  return (
+    <>
+      <div>
+        <h2>Login</h2>
+        <input
+          type="text"
+          onChange={(e) => {
+            setUserName(e.target.value);
+          }}
+          placeholder="username"
+        />
+
+        <input
+          type="text"
+          onChange={(e) => {
+            setPassword(e.target.value);
+          }}
+          placeholder="password"
+        />
+        <button onClick={handleSubmit}>Submit</button>
+      </div>
+    </>
+  );
+}
+export default Login;
+
+
+.................
+profile.jsx
+We are acessing user from our provider.
+
+import React , {useContext }from 'react'
+import UserContext from '../context/UserContext'
+
+function Profile() {
+
+    const {user} = useContext(UserContext)
+    if (!user) {
+        return(
+            <>
+            <div>Please Login!</div>
+            </>
+        )
+        
+    }
+  return (
+    <div>Welcome {user.username}</div>
+  )
+}
+
+export default Profile
+
+
