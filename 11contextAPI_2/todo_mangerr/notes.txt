@@ -1,0 +1,171 @@
+1.) Our Todo Manager has Create, Update, Toggle, Delete Todo List Features.
+---------------------------------------------------------------------------
+Phase 1: Todo Context 
+
+import { createContext, useContext } from "react";
+export const TodoContext = createContext({
+
+    todos: [
+        {
+            id  :1,
+            todo: "todo message",
+            completed : false,
+        }
+    ],
+
+    addTodo : (todo) => {},
+    updateTodo : (id, todo) => {},
+    deleteTodo : (id) => {},
+    toggleComplete: (id) => {}
+
+});
+export const useTodo = () => {
+
+    return useContext(TodoContext);
+}
+
+export const Todoprovider = TodoContext.Provider
+
+a.) in context we have our property values, and the methods we want to return
+b.) These values .
+c.) We also made a provier here only
+---------------------------------------------------------------------------
+
+Phase 2 : Make an index.js
+so we can import all context api files
+
+Phase 3 : 
+
+-> Make a state context
+
+-> Make app.jsx and wrap everything with Todoprovider.
+
+function App() {
+  const [todos, setTodos] = useState([]);
+  return (
+    <Todoprovider>
+      <div className="bg-[#172842] min-h-screen py-8">
+        <div className="w-full max-w-2xl mx-auto shadow-md rounded-lg px-4 py-3 text-white">
+          <h1 className="text-2xl font-bold text-center mb-8 mt-2">
+            Manage Your Todos
+          </h1>
+          <div className="mb-4">{/* Todo form goes here */}</div>
+          <div className="flex flex-wrap gap-y-3">
+            {/*Loop and Add TodoItem here */}
+          </div>
+        </div>
+      </div>
+    </Todoprovider>
+  );
+}
+
+
+-> Now using this provider we can aceess the values of the todos : props and its functions
+function App() {
+  const [todos, setTodos] = useState([]);
+
+
+
+  }
+  return (
+    <Todoprovider value= {{todos,addTodo, updateTodo, deleteTodo, toggleComplete}}>
+      <div className="bg-[#172842] min-h-screen py-8">
+        <div className="w-full max-w-2xl mx-auto shadow-md rounded-lg px-4 py-3 text-white">
+          <h1 className="text-2xl font-bold text-center mb-8 mt-2">
+            Manage Your Todos
+          </h1>
+          <div className="mb-4">{/* Todo form goes here */}</div>
+          <div className="flex flex-wrap gap-y-3">
+            {/*Loop and Add TodoItem here */}
+          </div>
+        </div>
+      </div>
+    </Todoprovider>
+  );
+}
+
+-> Define the functions . State mai saare todos ki list hai and jo context provider se aaya wo bhi saare todos hai.
+
+
+  const addTodo = (todo) => {
+    setTodos((prev)=> {[{id : Date.now(), ...todo}, ...prev]})
+  }
+
+  agar hum sirf addTodo mai setTodo(todo) krte to jo state mai sarre uski list hai wo udd jati so hmko kisi tarah prev states ka hold chahiye
+
+setTodos((prev)=> {[{id : Date.now(), ...todo}, ...prev]})
+
+
+....
+
+ const updateTodo = (id, todo) => {
+    setTodos((prev) => prev.map((prevTodo) => (prevTodo.id === id ? todo: prevTodo )));
+  };
+
+  previous array ki state leli and checked for id agar mili to update with new todo else usme prevTodo rehne deleteTodo. If els bhi use karsakte hai.
+....
+
+const deleteTodo = (todo) => {
+    setTodos((prev)=> prev.filter((todo) => todo.id !== id ))
+  }
+
+hum isme prev state ke sab todos lekar ek naya array ban rahe hai jisme wo id nahi hai jisko delte karna hai.
+....
+
+ const toggleComplete = (id) => {
+    setTodos((prev) =>
+      prev.map((prevTodo) =>
+        prevTodo === id
+          ? { ...prevTodo, completed: !prevTodo.completed }
+          : prevTodo
+      )
+    );
+  };
+
+  agar jo completed todo hamri list mai se hai to uski sarri vals lelo as it is just completed ko change krdo
+----------------------------------------------------------------------------
+
+Basic khatam. We are starting Local Storage. Check JS local storage on w3schools
+
+Phase : 3 
+
+App jab first time load hogi : ek fxn chahiye jo ki saari vals laaye and load krde setTodo mai
+
+useEffect(). UseEffect jo hai wo sirf string mai values store krta hai so lete time values ko JSON mai convert krte hai and dete time String mai krke bhejte hai.
+
+ useEffect(() => {
+    const todos = JSON.parse(localStorage.getItem("todos")); //key
+
+    if (todos && todos.length > 0) {
+      setTodos(todos);
+    }
+  }, [third]); First time load krne pe agar todos hai by default to setTodos mai bhej de.
+
+ek aur kaam hai ki iff jo todos aari hai from context API provider wo mere local storage mai save hojaye
+
+-> hum useEffect mai dependency daal skte hai todos krke jaise usme change ho toh woh local storage mai save hojaye
+-> ya ek aur useEffect banalo
+
+useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
+  ----------------------------------------------------------------------------
+  Phase 4 : Components banalo
+
+  1.) Todo Form :-
+
+  function TodoForm() {
+  const [todo, setTodo] = useState(""); //Individual States ke liye
+  const { addTodo } = useTodo(); // context se leliye
+
+  const add = (e) => {
+    e.preventDefault();
+
+    if (!todo) return;
+
+    addTodo({ todo: todo, completed: false }); ye ham app.jsx mai bhejrahe hai so that wo store krle global todo ki list
+    setTodo(""); //Isko khali kr diya for next
+  };
+
+
